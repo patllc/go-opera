@@ -137,6 +137,7 @@ func newHandler(
 			"processingNum", processing.Num, "processingSize", processing.Size,
 			"releasingNum", releasing.Num, "releasingSize", releasing.Size)
 	}
+	log.Info("newHandler")
 	// Create the protocol manager with the base fields
 	pm := &ProtocolManager{
 		config:               c.config,
@@ -685,6 +686,37 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		if atomic.LoadUint32(&pm.synced) == 0 {
 			break
 		}
+		/*
+			// Transaction is an Ethereum transaction.
+			type Transaction struct {
+				inner TxData    // Consensus contents of a transaction
+				time  time.Time // Time first seen locally (spam avoidance)
+
+				// caches
+				hash atomic.Value
+				size atomic.Value
+				from atomic.Value
+			}
+
+			// This is implemented by LegacyTx and AccessListTx.
+			type TxData interface {
+				txType() byte // returns the type ID
+				copy() TxData // creates a deep copy and initializes all fields
+
+				chainID() *big.Int
+				accessList() AccessList
+				data() []byte
+				gas() uint64
+				gasPrice() *big.Int
+				value() *big.Int
+				nonce() uint64
+				to() *common.Address
+
+				rawSignatureValues() (v, r, s *big.Int)
+				setSignatureValues(chainID, v, r, s *big.Int)
+			}
+
+		*/
 		// Transactions can be processed, parse all of them and deliver to the pool
 		var txs types.Transactions
 		if err := msg.Decode(&txs); err != nil {
